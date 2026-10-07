@@ -1,0 +1,189 @@
+﻿@using ClientsApp.Models
+@using ClientsApp.Services
+@inject ClientsOdataService ClientsService
+@page "/"
+
+<style>
+    .cl-contenedor {
+
+        font-family: "72", Arial, sans-serif;
+
+        background: #F5F6F7;
+
+        padding: 16px;
+
+        min-height: 100%;
+
+        display: flex;
+
+        gap: 16px;
+
+    }
+
+
+    .cl-titulo {
+
+        color: #32363A;
+
+        font-size: 20px;
+
+        font-weight: 600;
+
+        margin-bottom: 12px;
+
+    }
+
+
+    .cl-lista {
+
+        flex: 1;
+
+        max-width: 320px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 8px;
+
+    }
+
+
+    .cl-item {
+
+        background: white;
+
+        border: 1px solid #D9D9D9;
+
+        border-radius: 4px;
+
+        padding: 12px 16px;
+
+        cursor: pointer;
+
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+    }
+
+
+    .cl-item:hover {
+
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+    }
+
+
+    .cl-item.seleccionado {
+
+        border-color: #0854A0;
+
+        border-left: 4px solid #0854A0;
+
+        background: #EEF4FB;
+
+    }
+
+
+    .cl-item-nombre {
+
+        font-weight: 600;
+
+        color: #32363A;
+
+    }
+
+
+    .cl-detalle {
+
+        flex: 2;
+
+        background: white;
+
+        border: 1px solid #D9D9D9;
+
+        border-radius: 4px;
+
+        padding: 20px;
+
+    }
+
+
+    .cl-detalle-vacio {
+
+        flex: 2;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        color: #6a6d70;
+
+        border: 1px dashed #D9D9D9;
+
+        border-radius: 4px;
+
+        background: white;
+
+    }
+
+
+    .cl-cargando {
+
+        color: #6a6d70;
+
+        padding: 20px;
+
+    }
+</style>
+
+<div class="cl-contenedor">
+    <h1 class="cl-titulo">Clientes</h1>
+
+    @if (isLoading)
+    {
+        <div class="cl-cargando">Cargando clientes...</div>
+    }
+    else if (clients.Count == 0)
+    {
+        <div class="cl-cargando">No se encontraron clientes.</div>
+    }
+    else
+    {
+        <div class="cl-lista">
+            @foreach (var client in clients)
+            {
+                <div class="cl-item">
+                    <div class="cl-item-nombre">@client.Name</div>
+                    <div>@client.Type</div>
+                    <div>@client.CreditLimit.ToString("C")</div>
+                    <div>@client.TotalOrders ?? 0 orders</div>
+                    <div>@client.AvailableCredit.ToString("C")</div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Client> clients = new List<Client>();
+    private bool isLoading = true;
+    //ya a dormir T°T
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            clients = await ClientsService.GetClientsAsync();
+        }
+        catch (Exception ex)
+        {
+            // Manejar el error, por ejemplo, mostrar un mensaje al usuario
+            Console.WriteLine($"Error al obtener los clientes: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
